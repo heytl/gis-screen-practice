@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
     "echarts": "^5.4.2",
     "element-plus": "^2.3.4",
     "ol": "^7.3.0",
