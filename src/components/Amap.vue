@@ -3,7 +3,8 @@
     <div id="container"></div>
   </div>
 </template>
-<script setup>
+
+<script lang="ts" setup>
 import { onMounted, reactive, ref, getCurrentInstance } from 'vue'
 import AMapLoader from '@amap/amap-jsapi-loader'
 import { shallowRef } from 'vue'
@@ -101,6 +102,7 @@ onMounted(() => {
   initMap()
 })
 </script>
+
 <style lang="scss">
 #container {
   width: 100%;

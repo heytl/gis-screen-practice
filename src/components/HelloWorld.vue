@@ -6,11 +6,16 @@ const router = useRouter()
 const clickBtn = () => {
   router.push('/gis')
 }
+
+const clickAmapBtn = () => {
+  router.push('/amap')
+}
 </script>
 
 <template>
   <div class="card">
     <el-button @click="clickBtn">GIS 大屏</el-button>
+    <el-button @click="clickAmapBtn">Amap 地图</el-button>
   </div>
 </template>
 
@@ -24,9 +29,9 @@ const clickBtn = () => {
 
   .el-button {
     height: 100px;
-    width: 200px;
+    width: auto;
     font-size: 40px;
-    border-radius: 30px;
+    border-radius: 20px;
   }
 }
 </style>

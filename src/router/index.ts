@@ -9,6 +9,11 @@ const routes: RouteRecordRaw[] = [
     path: '/gis',
     component: () => import('../components/GIS.vue'),
     meta: {}
+  },
+  {
+    path: '/amap',
+    component: () => import('../components/Amap.vue'),
+    meta: {}
   }
 ]
 
@@ -17,4 +22,4 @@ const router = createRouter({
   routes: routes
 })
 
-export default router;
+export default router
