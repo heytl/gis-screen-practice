@@ -14,6 +14,11 @@ const routes: RouteRecordRaw[] = [
     path: '/amap',
     component: () => import('../components/Amap.vue'),
     meta: {}
+  },
+  {
+    path: '/demo',
+    component: () => import('../components/OlDemo.vue'),
+    meta: {}
   }
 ]
 

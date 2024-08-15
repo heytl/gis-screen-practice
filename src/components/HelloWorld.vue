@@ -3,19 +3,17 @@ import { useRouter } from 'vue-router'
 defineProps<{ msg: string }>()
 const router = useRouter()
 
-const clickBtn = () => {
-  router.push('/gis')
+const clickBtn = (path = '/gis') => {
+  router.push(path)
 }
 
-const clickAmapBtn = () => {
-  router.push('/amap')
-}
 </script>
 
 <template>
   <div class="card">
     <el-button @click="clickBtn">GIS 大屏</el-button>
-    <el-button @click="clickAmapBtn">Amap 地图</el-button>
+    <el-button @click="clickBtn('/amap')">Amap 地图</el-button>
+    <el-button @click="clickBtn('/demo')">Demo</el-button>
   </div>
 </template>
 

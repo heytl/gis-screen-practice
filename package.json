@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@amap/amap-jsapi-loader": "^1.0.1",
+    "@turf/turf": "^7.1.0",
     "echarts": "^5.4.2",
     "element-plus": "^2.3.4",
     "ol": "^7.3.0",
