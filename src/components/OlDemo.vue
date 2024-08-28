@@ -2,13 +2,13 @@
 import 'ol/ol.css'
 import { Map, View, Feature, MapBrowserEvent } from 'ol'
 import { onMounted, onUnmounted, ref } from 'vue'
-import { XYZ } from 'ol/source'
+import { Cluster, XYZ } from 'ol/source'
 import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { useGeographic } from 'ol/proj'
 import { Circle, Point, LineString } from 'ol/geom'
-import { Style, Circle as CircleStyle, Fill, Stroke } from 'ol/style'
+import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style'
 import Icon from 'ol/style/Icon'
 import markerIcon from '../assets/vue.svg'
 import { METERS_PER_UNIT } from 'ol/proj/Units'
@@ -16,6 +16,8 @@ import { routePoints } from '../assets/route.ts'
 import * as turf from '@turf/turf'
 import GeoJSON from 'ol/format/GeoJSON.js'
 import { createCurvePoints } from '../utils/ol-utils/map.js'
+import { Graticule } from 'ol/layer'
+import MapPlot from './Ol/MapPlot.vue'
 const coords = [121.45495613864011, 31.210585926692985]
 const mapRef = ref()
 const dialogVisible = ref(false)
@@ -220,29 +222,35 @@ const addArcLine = () => {
   otherLayer?.getSource()?.addFeature(curvedLine)
 }
 
+const mapInited = ref(false)
 onMounted(() => {
   map.setTarget(mapRef.value)
-  map.addLayer(vectorLayer)
+  // map.addLayer(vectorLayer)
   map.addLayer(lineLayer)
   map.addLayer(otherLayer)
   map.on('pointermove', _hoverHandler)
   map.on('singleclick', _clickHander)
+  mapInited.value = true
   source.addFeature(
     new Feature({
       geometry: new Point(coords)
     })
   )
+
   addLine()
   addArcLine()
 })
 
 onUnmounted(() => {
   map.setTarget(undefined)
+  mapInited.value = false
 })
 </script>
 
 <template>
-  <div id="map" ref="mapRef"></div>
+  <div id="map" ref="mapRef">
+    <MapPlot v-if="mapInited" :map="map" />
+  </div>
 </template>
 
 <style lang="scss">
