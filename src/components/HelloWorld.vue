@@ -11,7 +11,7 @@ const clickBtn = (path = '/gis') => {
 
 <template>
   <div class="card">
-    <el-button @click="clickBtn">GIS 大屏</el-button>
+    <el-button @click="clickBtn('/gis')">GIS 大屏</el-button>
     <el-button @click="clickBtn('/amap')">Amap 地图</el-button>
     <el-button @click="clickBtn('/demo')">Demo</el-button>
   </div>

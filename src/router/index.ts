@@ -2,22 +2,22 @@ import { type RouteRecordRaw, createRouter, createWebHashHistory } from 'vue-rou
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    component: () => import('../components/HelloWorld.vue'),
+    component: () => import('@/components/HelloWorld.vue'),
     meta: {}
   },
   {
     path: '/gis',
-    component: () => import('../components/GIS.vue'),
+    component: () => import('@/views/openlayers/echarts/GIS.vue'),
     meta: {}
   },
   {
     path: '/amap',
-    component: () => import('../components/Amap.vue'),
+    component: () => import('@/views/amap/Amap.vue'),
     meta: {}
   },
   {
     path: '/demo',
-    component: () => import('../components/OlDemo.vue'),
+    component: () => import('@/views/openlayers/demo/OlDemo.vue'),
     meta: {}
   }
 ]

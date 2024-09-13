@@ -10,14 +10,15 @@ import { useGeographic } from 'ol/proj'
 import { Circle, Point, LineString } from 'ol/geom'
 import { Style, Circle as CircleStyle, Fill, Stroke, Text } from 'ol/style'
 import Icon from 'ol/style/Icon'
-import markerIcon from '../assets/vue.svg'
+import markerIcon from '@/assets/vue.svg'
 import { METERS_PER_UNIT } from 'ol/proj/Units'
-import { routePoints } from '../assets/route.ts'
+import { routePoints } from '@/assets/route.ts'
 import * as turf from '@turf/turf'
 import GeoJSON from 'ol/format/GeoJSON.js'
-import { createCurvePoints } from '../utils/ol-utils/map.js'
+//@ts-ignore
+import { createCurvePoints } from '@/utils/ol-utils/map.js'
 import { Graticule } from 'ol/layer'
-import MapPlot from './Ol/MapPlot.vue'
+import MapPlot from '@/components/Ol/MapPlot.vue'
 const coords = [121.45495613864011, 31.210585926692985]
 const mapRef = ref()
 const dialogVisible = ref(false)
@@ -51,7 +52,8 @@ const poiSatelliteLayer = new TileLayer({
 })
 
 const map = new Map({
-  layers: [poiSatelliteLayer, offlineSatelliteLayer],
+  // layers: [poiSatelliteLayer, offlineSatelliteLayer],
+  layers: [basemapLayer],
   view: new View({
     center: coords,
     zoom: 8

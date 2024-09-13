@@ -10,8 +10,8 @@ import { useGeographic } from 'ol/proj'
 import Point from 'ol/geom/Point'
 import Style from 'ol/style/Style'
 import Icon from 'ol/style/Icon'
-import markerIcon from '../assets/vue.svg'
-import EchartsDemo from './EchartsDemo.vue'
+import markerIcon from '@/assets/vue.svg'
+import EchartsDemo from '@/views/openlayers/echarts/EchartsDemo.vue'
 
 const coords = [104.06771001652146, 30.55203564754484]
 const mapRef = ref()
