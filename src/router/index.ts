@@ -17,7 +17,7 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/demo',
-    component: () => import('@/views/openlayers/demo/OlDemo.vue'),
+    component: () => import('@/views/openlayers/demo/DevMap.vue'),
     meta: {}
   }
 ]

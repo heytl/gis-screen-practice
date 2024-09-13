@@ -16,7 +16,7 @@ import { routePoints } from '@/assets/route.ts'
 import * as turf from '@turf/turf'
 import GeoJSON from 'ol/format/GeoJSON.js'
 //@ts-ignore
-import { createCurvePoints } from '@/utils/ol-utils/map.js'
+import { createCurvePoints } from '@/utils/map/map.js'
 import { Graticule } from 'ol/layer'
 import MapPlot from '@/components/Ol/MapPlot.vue'
 const coords = [121.45495613864011, 31.210585926692985]
