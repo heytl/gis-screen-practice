@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CommonMap from '@/components/CommonMap/index.vue'
 import MapPlot from '@/components/Ol/MapPlot.vue'
+import MapTool from '@/views/openlayers/demo/MapTool.vue'
 import { onMounted, ref, watch } from 'vue'
 import { useHandleMap } from './hooks/useHandleMapHooks'
 import DragRotate from 'ol/interaction/DragRotate'
@@ -81,6 +82,7 @@ function addControls() {
 
 <template>
   <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick">
+    <MapTool />
   </CommonMap>
 </template>
 
