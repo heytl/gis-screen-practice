@@ -13,7 +13,7 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
-    <MapMeasure ref="measureRef" :disabled="measureToolData.disable" :type="measureToolData.type" />
+    <MapMeasure ref="measureRef" :disabled="measureToolData.disable" :type="measureToolData.type" show-node-tip />
   </div>
 </template>
 <script lang="ts" setup>

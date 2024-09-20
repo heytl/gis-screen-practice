@@ -24,6 +24,12 @@
       <el-icon class="my-map-measure__delete el-icon-delete" @click="handleDelete(item, index)">
         <Delete />
       </el-icon>
+      <template v-if="showNodeTip">
+        <MapHtml v-for="(childItem, index) in item.eachMeasures" :key="index" class="my-map-measure__tip"
+          :class="`is-${theme}`" positioning="bottom-center" :position="childItem[0]" :offset="[0, -7]">
+          <span v-html="childItem[1]" />
+        </MapHtml>
+      </template>
     </MapHtml>
     <MapHtml
       v-if="helpTipPosition && !disabled"
@@ -39,6 +45,20 @@
     <MapHtml v-if="measureTipPosition" class="my-map-measure__tip" :class="`is-${theme}`" :position="measureTipPosition" :offset="[0, -15]" positioning="bottom-center">
       <span v-html="measureTip" />
     </MapHtml>
+    <!-- 每一段的距离文本 -->
+    <template v-if="showNodeTip">
+      <MapHtml
+        v-for="(item, index) in eachMeasures"
+        :key="index"
+        class="my-map-measure__tip"
+        :class="`is-${theme}`"
+        positioning="bottom-center"
+        :position="item[0]"
+        :offset="[0, -7]"
+      >
+        <span v-html="item[1]" />
+      </MapHtml>
+    </template>
   </div>
 </template>
 <script>
@@ -118,7 +138,8 @@ export default {
         return defaultBrush
       }
     },
-    effect: [Object, Function]
+    effect: [Object, Function],
+    showNodeTip: Boolean
   },
   data() {
     return {
@@ -129,6 +150,7 @@ export default {
       measureTipOffset: [0, -15],
       changeListener: null,
       measures: [],
+      eachMeasures: [],
       value: 0
     }
   },
@@ -191,11 +213,22 @@ export default {
       const geometry = evt.feature.getGeometry()
       let coordinate = evt.coordinate
       let output
+      let lastLength = 0
       this.changeListener = geometry.on('change', (evt) => {
         const geom = evt.target
         if (this.type === 'line') {
           output = this.formatLength(geom)
           coordinate = geom.getLastCoordinate()
+          const coordinates = geom.getCoordinates()
+          if (lastLength < coordinates.length - 1) {
+            // 线要素最后一个节点前的节点
+            if (lastLength == 0) {
+              this.eachMeasures = [[geometry.getFirstCoordinate(), '起点']]
+            } else {
+              this.eachMeasures.push([coordinates[lastLength], output])
+            }
+            lastLength++
+          }
         } else if (this.type === 'area') {
           output = this.formatArea(geom)
           coordinate = geom.getInteriorPoint().getCoordinates()
@@ -213,11 +246,14 @@ export default {
     },
     handleDrawEnd({ feature }) {
       this.changeListener && unByKey(this.changeListener)
+      this.eachMeasures.pop()
       this.measures.push({
         feature,
+        eachMeasures: this.eachMeasures,
         position: this.measureTipPosition,
         content: this.measureTip
       })
+      this.eachMeasures = []
       this.$nextTick(() => {
         this.helpTip = this.startTip
         this.helpTipPosition = null
@@ -237,6 +273,7 @@ export default {
         this.$refs.draw.finish()
         this.$refs.draw.draw()
       }
+      this.eachMeasures = []
     },
     /**
      * 清空画板
@@ -252,6 +289,7 @@ export default {
     finish() {
       this.$refs.draw.finish()
       this.measureTipPosition = null
+      this.eachMeasures = []
     }
   }
 }
