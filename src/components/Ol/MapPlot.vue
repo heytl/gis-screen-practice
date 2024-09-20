@@ -50,8 +50,8 @@ function activate(type: String) {
 <style scoped>
 .map-plot {
   position: absolute;
-  top: 20px;
-  left: 50px;
+  top: 2%;
+  left: 2%;
   z-index: 999;
 }
 </style>

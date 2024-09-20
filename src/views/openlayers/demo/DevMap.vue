@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import CommonMap from '@/components/CommonMap/index.vue'
 import MapPlot from '@/components/Ol/MapPlot.vue'
-import MapTool from '@/views/openlayers/demo/MapTool.vue'
-import { onMounted, ref, watch } from 'vue'
+import MapTool from '@/views/openlayers/demo/components/MapTool.vue'
+import MapToolBox from '@/views/openlayers/demo/components/map-toolbox.vue'
+import { onMounted, ref, shallowRef } from 'vue'
 import { useHandleMap } from './hooks/useHandleMapHooks'
 import DragRotate from 'ol/interaction/DragRotate'
 import DragPan from 'ol/interaction/DragPan'
@@ -11,7 +12,7 @@ import { Graticule } from 'ol/layer'
 import { OverviewMap, ScaleLine } from 'ol/control'
 import TileLayer from 'ol/layer/Tile'
 import { XYZ } from 'ol/source'
-const mapRef = ref(null)
+const mapRef = shallowRef(null)
 const { mapPointerMove, mapClick } = useHandleMap()
 
 onMounted(() => {
@@ -19,6 +20,14 @@ onMounted(() => {
   // addGraticule()
   // addControls()
 })
+
+const mapInstance = shallowRef(null)
+const mapInited = ref(false)
+function mapDefined(map) {
+  mapInstance.value = map
+  mapInited.value = true
+  console.log('map', mapInstance.value);
+}
 
 function addCustomInteraction() {
   // 添加DragPan交互，允许通过鼠标中键拖动视图
@@ -81,8 +90,10 @@ function addControls() {
 </script>
 
 <template>
-  <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick">
+  <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick" @mapDefined="mapDefined">
     <MapTool />
+    <MapToolBox />
+    <MapPlot v-if="mapInited" :map="mapInstance" />
   </CommonMap>
 </template>
 

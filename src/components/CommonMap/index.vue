@@ -108,6 +108,7 @@ defineExpose({
 })
 
 provide('map', map)
+provide('mapVm', map)
 </script>
 
 <style lang="scss" scoped>

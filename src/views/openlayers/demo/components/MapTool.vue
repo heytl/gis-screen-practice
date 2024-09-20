@@ -102,7 +102,7 @@ function updateTool(tool) {
 .map-tool {
   z-index: 12;
   position: absolute;
-  top: 0.5rem;
-  left: 27%;
+  top: 2%;
+  left: 10%;
 }
 </style>
