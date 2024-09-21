@@ -2,16 +2,15 @@
 import CommonMap from '@/components/CommonMap/index.vue'
 import MapPlot from '@/components/Ol/MapPlot.vue'
 import MapTool from '@/views/openlayers/demo/components/MapTool.vue'
-import MapToolBox from '@/views/openlayers/demo/components/map-toolbox.vue'
+import MapToolBox from '@/views/openlayers/demo/components/map-toolbox-new.vue'
+import MapToolBoxNew from '@/views/openlayers/demo/components/MapToolBox.vue'
 import { onMounted, ref, shallowRef } from 'vue'
 import { useHandleMap } from './hooks/useHandleMapHooks'
-import DragRotate from 'ol/interaction/DragRotate'
-import DragPan from 'ol/interaction/DragPan'
-import { always, altKeyOnly, mouseOnly } from 'ol/events/condition'
 import { Graticule } from 'ol/layer'
 import { OverviewMap, ScaleLine } from 'ol/control'
 import TileLayer from 'ol/layer/Tile'
 import { XYZ } from 'ol/source'
+import MiddleClickDragRotate from '@/plugins/ol-mapkit/MiddleClickDragRotate.js'
 const mapRef = shallowRef(null)
 const { mapPointerMove, mapClick } = useHandleMap()
 
@@ -30,19 +29,8 @@ function mapDefined(map) {
 }
 
 function addCustomInteraction() {
-  // 添加DragPan交互，允许通过鼠标中键拖动视图
-  const dragRotate = new DragRotate({
-    condition: altKeyOnly // 只在中键按下时触发
-  })
-  console.log('onMounted-DevMap')
-  // 添加DragPan交互，设置条件为中键按下
-  const dragPan = new DragPan({
-    condition: (event) => {
-      return event.originalEvent.button === 1
-    } // 仅在中键按下时触发
-  })
-  // mapRef.value.map.addInteraction(dragPan)
-  mapRef.value.map.addInteraction(dragRotate)
+  const rotateInteraction = new MiddleClickDragRotate();
+  mapRef.value.map.addInteraction(rotateInteraction);
 }
 
 function addGraticule() {
@@ -93,6 +81,7 @@ function addControls() {
   <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick" @mapDefined="mapDefined">
     <MapTool />
     <MapToolBox />
+    <MapToolBoxNew />
     <MapPlot v-if="mapInited" :map="mapInstance" />
   </CommonMap>
 </template>
