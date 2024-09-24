@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Map from 'ol/Map'
-import { inject, ref, reactive, onMounted, toRaw } from 'vue'
+import { inject, reactive, onMounted, toRaw, onUnmounted } from 'vue'
 import MapHtml from '@/components/CommonMap/MapHtml/map-html.vue'
 
 const map = inject<Map>('map')
@@ -15,28 +15,44 @@ onMounted(() => {
   init(toRaw(map))
 })
 
+onUnmounted(() => {
+  dispose(toRaw(map))
+})
+
 function init(map) {
   if (!map) return
-  
-  map.on('contextmenu', function (evt) {
-    evt.preventDefault();
-
-    const feature = map.forEachFeatureAtPixel(evt.pixel, (ft) => ft);
-    if (feature && feature.get('type') === 'removable') {
-      var coordinate = evt.coordinate;
-      console.log('contextmenu', coordinate);
-      contextMenuParams.show = true
-      contextMenuParams.position = coordinate
-      contextMenuParams.feature = feature
-    } else {
-      contextMenuParams.show = false
-      contextMenuParams.feature = null
-    }
-  });
+  map.on('contextmenu', onContextMenu);
+  map.on('click', onMapClick)
 }
 
+function dispose(map) {
+  map.un('contextmenu', onContextMenu);
+  map.un('click', onMapClick)
+}
+
+// 地图右键菜单处理回调函数
+function onContextMenu(evt) {
+  evt.preventDefault()
+  const feature = map.forEachFeatureAtPixel(evt.pixel, (ft) => ft);
+  console.log('onContextMenu');
+
+  if (feature && feature.get('type') === 'removable') {
+    var coordinate = evt.coordinate;
+    contextMenuParams.show = true
+    contextMenuParams.position = coordinate
+    contextMenuParams.feature = feature
+  } else {
+    contextMenuParams.show = false
+    contextMenuParams.feature = null
+  }
+}
+
+function onMapClick() {
+  contextMenuParams.show = false
+}
+
+// 菜单被点击
 function handleClick() {
-  console.log('handleClick')
   contextMenuParams.show = false
   emits('removeFeature', contextMenuParams.feature)
 }
