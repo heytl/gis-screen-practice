@@ -643,7 +643,7 @@ export default {
   font-size: 14px;
   position: absolute;
   top: 10%;
-  left: 10%;
+  left: 20%;
   display: flex;
   z-index: 100;
 

@@ -21,16 +21,20 @@
     </div>
     <transition name="fade">
       <div class="tool_open_box" v-show="mapToolBoxData.mapToolBoxIn">
-        <div v-for="(item, index) in toolData" :key="item.name">
-          <p>{{ item.name }}</p>
-          <ul>
-            <li v-for="itemIn in item.data" @click="mapActive(itemIn, index)" :key="itemIn.name">
-              <i class="state" v-if="!!itemIn.select"></i>
-              <img :src="itemIn.src" height="42" />
-              <span>{{ itemIn.name }}</span>
-            </li>
-          </ul>
-        </div>
+        <el-collapse v-model="activeNames" class="my-el-collapse">
+          <div v-for="(item, index) in toolData" :key="item.name">
+            <el-collapse-item :title="item.name" :name="item.name">
+              <!-- <p>{{ item.name }}</p> -->
+              <ul>
+                <li v-for="itemIn in item.data" @click="mapActive(itemIn, index)" :key="itemIn.name">
+                  <i class="state" v-if="!!itemIn.select"></i>
+                  <img :src="itemIn.src" height="42" />
+                  <span>{{ itemIn.name }}</span>
+                </li>
+              </ul>
+            </el-collapse-item>
+          </div>
+        </el-collapse>
       </div>
     </transition>
   </div>
@@ -46,11 +50,11 @@ import Utils from '@/utils'
 import { Tools } from '@element-plus/icons-vue'
 import 'ol-plot/dist/ol-plot.css'
 import Plot from 'ol-plot'
-import { nextTick } from 'vue'
+import { toRaw } from 'vue'
 
 export default {
   name: 'map-toolbox',
-  inject: ['map'],
+  inject: ['mapVm'],
   emits: ['submit', 'selectionDrawEnd', 'showBox'], // 提交事件, 框选/圈选事件
   components: {
     Tools,
@@ -87,13 +91,6 @@ export default {
     }
   },
   computed: {
-    olMap() {
-      if (this.map) {
-        console.log('111');
-
-      }
-      return this?.map || null
-    },
     // 计算图形样式配置
     getGraphEffect() {
       return {
@@ -130,15 +127,8 @@ export default {
     }
   },
   mounted() {
-    console.log('map', this.map);
-    setTimeout(()=>{
-      console.log('map', this.map);
-      
-    }, 5000)
-    nextTick(() => {
-      console.log('map', this.map);
-
-    })
+    this.map = this.mapVm
+    this.initPlot(toRaw(this.map))
   },
   data() {
     return {
@@ -152,6 +142,7 @@ export default {
       searchAround: false,
       searchPoiCenter: null,
       searchPoiRadius: 5000,
+      activeNames: ['工具'],
       // 图形参数
       graph: {
         type: 'None'
@@ -186,25 +177,25 @@ export default {
         }
       },
       toolData: [
-        {
-          name: '编辑',
-          data: [
-            // {
-            //   name: "提交",
-            //   src: new URL("@/assets/image/map/tool/submit.png")
-            // },
-            {
-              name: '截屏',
-              src: new URL('@/assets/image/map/tool/printing.png', import.meta.url).href
-            }
-          ]
-        },
+        // {
+        //   name: '编辑',
+        //   data: [
+        //     {
+        //       name: "提交",
+        //       src: new URL("@/assets/image/map/tool/submit.png")
+        //     },
+        //   ]
+        // },
         {
           name: '工具',
           data: [
             {
               name: '清屏工具',
               src: new URL('@/assets/image/map/tool/clear.png', import.meta.url).href
+            },
+            {
+              name: '截屏',
+              src: new URL('@/assets/image/map/tool/printing.png', import.meta.url).href
             },
             {
               name: '测距',
@@ -216,16 +207,16 @@ export default {
               src: new URL('@/assets/image/map/tool/side.png', import.meta.url).href,
               select: false
             },
-            {
-              name: '框选',
-              src: new URL('@/assets/image/map/tool/BoxSelection.png', import.meta.url).href,
-              select: false
-            },
-            {
-              name: '圈选',
-              src: new URL('@/assets/image/map/tool/circle.png', import.meta.url).href,
-              select: false
-            }
+            // {
+            //   name: '框选',
+            //   src: new URL('@/assets/image/map/tool/BoxSelection.png', import.meta.url).href,
+            //   select: false
+            // },
+            // {
+            //   name: '圈选',
+            //   src: new URL('@/assets/image/map/tool/circle.png', import.meta.url).href,
+            //   select: false
+            // }
           ]
         },
         {
@@ -283,6 +274,45 @@ export default {
         //   ]
         // },
         {
+          name: '态势',
+          data: [
+            {
+              name: '清屏图标',
+              src: new URL('@/assets/image/map/tool/clear.png', import.meta.url).href
+            },
+            {
+              name: '直线箭头',
+              type: 'StraightArrow',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '双箭头',
+              type: 'DoubleArrow',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '粗单直箭头',
+              type: 'AssaultDirection',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '进攻方向',
+              type: Plot.PlotTypes.ATTACK_ARROW,
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '集结地',
+              type: Plot.PlotTypes.GATHERING_PLACE,
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '直线箭头',
+              type: 'AssaultDirection',
+              src: this.getImage('')
+            },
+          ]
+        },
+        {
           name: '图标',
           data: [
             {
@@ -299,28 +329,19 @@ export default {
             }
           ]
         },
-        {
-          name: '态势',
-          data: [
-            {
-              name: '清屏图标',
-              src: new URL('@/assets/image/map/tool/clear.png', import.meta.url).href
-            },
-            {
-              name: '直线箭头',
-              type: 'AssaultDirection',
-              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
-            },
-          ]
-        }
       ]
     }
   },
   methods: {
     getImage(path) {
-      const data = new URL(path, import.meta.url).href;
-      // const data = new URL("/src/assets/a.png", import.meta.url).href;
+      // const data = new URL(path, import.meta.url).href;
+      const data = new URL("/src/assets/image/map/tool/zhixianjiantou.png", import.meta.url).href;
       return data;
+    },
+    getImage2(name) {
+      const modules = import.meta.glob('./assets/image/map/tool/*.png')
+      const path = `./assets/image/map/tool/zhixianjiantou.png`;
+      return modules[path].default;
     },
     toggleBox() {
       this.mapToolBoxData.mapToolBoxIn = !this.mapToolBoxData.mapToolBoxIn
@@ -331,8 +352,10 @@ export default {
     closeBox() {
       this.mapToolBoxData.mapToolBoxIn = false
       this.mapToolBoxData.measureDisable = true
+      this.graph.type = 'None'
       this.$refs.iconDraw.finish()
       this.$refs.selectionDraw.finish()
+      this.plot.plotEdit.deactivate();
     },
     //工具箱方法
     mapActive(type, index) {
@@ -342,35 +365,28 @@ export default {
           toolDatum.select = false
         }
       }
-      if (index === 0) {
-        switch (type.name) {
-          case '提交':
-            this.$confirm('确认提交?', '提示', {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            })
-              .then(() => {
-                this.$emit('submit', e)
-              })
-              .catch((e) => {
-                console.log(e)
-              })
-            break
-          case '截屏':
-            this.exportMap()
-            break
-        }
+      const unselectOther = (index) => {
+        this.toolData.forEach((item, i) => {
+          if (i !== index) {
+            unselectAll(i)
+          }
+        })
       }
-      if (index === 1) {
+      if (index === 0) {
         this.graph.type = 'None'
         this.$refs.iconDraw.finish()
-        unselectAll(2)
-        // unselectAll(4)
+        this.plot.plotEdit.deactivate();
+        unselectOther(index)
         switch (type.name) {
           case '清屏工具':
             this.$refs.measure.clear()
             this.$refs.selectionDraw.clear()
+            this.$refs.graph.clear()
+            this.$refs.iconDraw.clear()
+            this.plot?.plotUtils.removeAllFeatures()
+            break
+          case '截屏':
+            this.exportMap()
             break
           case '测距':
             if (type.select) {
@@ -422,21 +438,14 @@ export default {
               this.$refs.selectionDraw.draw()
             }
             break
-          case '搜索':
-            type.select = !type.select
-            unselectAll(3)
-            this.isShowSetting = false
-            this.isShowSettingSearch = type.select
-            this.searchKeyword = ''
-            break
         }
       }
-      if (index === 2) {
-        unselectAll(1)
-        // unselectAll(4)
+      if (index === 1) {
+        unselectOther(index)
         this.mapToolBoxData.measureDisable = true
         this.$refs.selectionDraw.finish()
         this.$refs.iconDraw.finish()
+        this.plot.plotEdit.deactivate();
         switch (type.name) {
           case '箭头':
             if (type.select) {
@@ -505,12 +514,11 @@ export default {
       //   this.isShowSetting = type.select
       // }
       if (index === 3) {
-        unselectAll(1)
-        unselectAll(2)
+        unselectOther(index)
         this.mapToolBoxData.measureDisable = true
         this.$refs.selectionDraw.finish()
         this.graph.type = 'None'
-
+        this.plot.plotEdit.deactivate();
         switch (type.name) {
           case '清屏图标':
             this.$refs.iconDraw.clear()
@@ -541,6 +549,27 @@ export default {
             break
         }
       }
+      if (index === 2) {
+        unselectOther(index)
+        this.mapToolBoxData.measureDisable = true
+        this.graph.type = 'None'
+        this.$refs.iconDraw.finish()
+        this.$refs.selectionDraw.finish()
+        this.plot.plotEdit.deactivate();
+        if (type.name == '清屏图标') {
+          this.plot?.plotUtils.removeAllFeatures()
+        } else {
+          if (type.select) {
+            type.select = false
+            this.plot?.plotEdit.deactivate()
+          } else {
+            unselectAll(index)
+            type.select = true
+            this.plot?.plotEdit.deactivate()
+            this.plot?.plotDraw.activate(type.type)
+          }
+        }
+      }
     },
     // 设置关闭
     closeSetting() {
@@ -555,10 +584,14 @@ export default {
     // 选中结束事件
     selectionDrawEnd(e) {
       this.$emit('selectionDrawEnd', e)
+      e.feature.set("type", "removable")
+      e.feature.set("tool", "selectionDraw")
     },
     // 绘制图标完成回调事件，进行设置图标样式
     iconDrawEnd(e) {
       e.feature.setStyle(parseStyle(this.mapToolBoxData.iconBrush))
+      e.feature.set("type", "removable")
+      e.feature.set("tool", "iconDraw")
     },
     // 图形绘制结束
     graphDrawEnd(e) {
@@ -578,6 +611,8 @@ export default {
             .catch((err) => console.log(err))
         }
       }
+      e.feature.set("type", "removable")
+      e.feature.set("tool", "graph")
     },
     // 导出地图截屏
     exportMap() {
@@ -593,6 +628,32 @@ export default {
       // 立即触发一次 rendercomplete 事件
       map.renderSync()
     },
+    // 初始化标绘工具
+    initPlot(map) {
+      this.plot = new Plot(map, {
+        zoomToExtent: true
+      })
+      this.plot.plotDraw.on('drawEnd', ({ feature }) => {
+        // 开始编辑 
+        if (feature) {
+          this.plot.plotEdit.activate(feature);
+          feature.set("type", "removable")
+          feature.set("tool", "plot")
+        }
+      });
+    },
+    deleteFeature(feature) {
+      console.log('deleteTool', feature);
+      const tool = feature?.get('tool') || ''
+      if (['iconDraw', 'selectionDraw', 'graph'].includes(tool)) {
+        this.$refs[tool]?.removeFeature(feature)
+      }
+      if (tool === 'plot') {
+        this.plot?.plotEdit.deactivate()
+        const source = this.plot.plotDraw.drawLayer.getSource()
+        source.removeFeature(feature)
+      }
+    }
   }
 }
 </script>
@@ -605,6 +666,23 @@ export default {
 </style>
 
 <style lang="scss" scoped>
+.my-el-collapse {
+  --el-collapse-border-color: transparent;
+  --el-collapse-header-height: 48px;
+  --el-collapse-header-bg-color: transparent;
+  --el-collapse-header-text-color: white;
+  --el-collapse-header-font-size: 13px;
+  --el-collapse-content-bg-color: transparent;
+  --el-collapse-content-font-size: 13px;
+  --el-collapse-content-text-color: white;
+  border-bottom: 0px;
+  border-top: 0px;
+}
+
+:deep(.el-collapse-item__content) {
+  padding-bottom: 0px;
+}
+
 .state {
   position: absolute;
   display: inline-block;
@@ -626,7 +704,7 @@ export default {
   z-index: 100;
 
   ::-webkit-scrollbar {
-    width: 4px;
+    width: 2px;
     height: 8px;
     background-color: #ebeef5;
   }
@@ -683,7 +761,7 @@ export default {
     border: 1px solid #2668e8;
     box-shadow: 0 0 20px 10px #12316d inset;
     background-color: #112266;
-    padding: 10px;
+    padding: 0 10px;
     color: #fff;
 
     p {
@@ -692,8 +770,8 @@ export default {
 
     ul {
       display: grid;
-      grid-template-columns: 33.3% 33.3% 33.3%;
-      margin: 0 0 10px 0;
+      grid-template-columns: 25% 25% 25% 25%;
+      // margin: 0 0 10px 0;
       padding: 0;
 
       li {
@@ -704,7 +782,7 @@ export default {
         position: relative;
         left: 0;
         top: 0;
-        margin-bottom: 10px;
+        // margin-bottom: 10px;
 
         &:hover {
           color: #00ddaa;

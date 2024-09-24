@@ -16,7 +16,13 @@ onMounted(() => {
   plot = new Plot(map, {
     zoomToExtent: true
   })
-
+  // 绘制后自动开启编辑
+  // plot.plotDraw.on('drawEnd', ({ feature }) => {
+  //   // 开始编辑
+  //   if (feature) {
+  //     plot.plotEdit.activate(feature);
+  //   }
+  // });
   // activate('DoubleArrow')
 })
 
