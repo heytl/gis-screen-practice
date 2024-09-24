@@ -2,9 +2,10 @@
 import CommonMap from '@/components/CommonMap/index.vue'
 import MapPlot from '@/components/Ol/MapPlot.vue'
 import MapTool from '@/views/openlayers/demo/components/MapTool.vue'
-import MapToolBox from '@/views/openlayers/demo/components/map-toolbox-new.vue'
+import MapToolBox from '@/views/openlayers/demo/components/map-toolbox.vue'
 import MapToolBoxNew from '@/views/openlayers/demo/components/MapToolBox.vue'
-import { onMounted, ref, shallowRef } from 'vue'
+import MapContextMenu from '@/views/openlayers/demo/components/map-contextmenu.vue'
+import { onMounted, reactive, ref, shallowRef } from 'vue'
 import { useHandleMap } from './hooks/useHandleMapHooks'
 import { Graticule } from 'ol/layer'
 import { OverviewMap, ScaleLine } from 'ol/control'
@@ -12,6 +13,7 @@ import TileLayer from 'ol/layer/Tile'
 import { XYZ } from 'ol/source'
 import MiddleClickDragRotate from '@/plugins/ol-mapkit/MiddleClickDragRotate.js'
 const mapRef = shallowRef(null)
+const toolBoxRef = ref(null)
 const { mapPointerMove, mapClick } = useHandleMap()
 
 onMounted(() => {
@@ -75,15 +77,21 @@ function addControls() {
   map.addControl(scaleLine)
   map.addControl(overViewControl)
 }
+
+function deleteFeature(feature) {
+  feature && toolBoxRef.value.deleteFeature(feature)
+}
 </script>
 
 <template>
   <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick" @mapDefined="mapDefined">
     <MapTool />
-    <MapToolBox />
-    <MapToolBoxNew />
+    <MapToolBox ref="toolBoxRef" />
+    <!-- <MapToolBoxNew /> -->
+    <MapContextMenu @removeFeature="deleteFeature" />
     <MapPlot v-if="mapInited" :map="mapInstance" />
   </CommonMap>
 </template>
 
-<style lang="sass" scoped></style>
+<style lang="scss" scoped>
+</style>

@@ -190,6 +190,25 @@
         this.source && this.source.clear()
       },
       /**
+       * 删除指定图形
+       * @method removeFeature
+       * @param feature
+       */
+      removeFeature(feature) {
+        const source = this.layer.getSource()
+        source.removeFeature(feature)
+      },
+      /**
+       * 添加图形, 图形加入到矢量图层
+       * @method addFeature
+       * @param {Feature[]|feature} feature
+       */
+      addFeature(feature) {
+        const features = [].concat(feature)
+        const source = this.layer.getSource()
+        source.addFeatures(features)
+      },
+      /**
        * 撤回上一次点
        **/
       redraw() {
