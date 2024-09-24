@@ -34,8 +34,6 @@ function dispose(map) {
 function onContextMenu(evt) {
   evt.preventDefault()
   const feature = map.forEachFeatureAtPixel(evt.pixel, (ft) => ft);
-  console.log('onContextMenu');
-
   if (feature && feature.get('type') === 'removable') {
     var coordinate = evt.coordinate;
     contextMenuParams.show = true

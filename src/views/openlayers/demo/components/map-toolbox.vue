@@ -51,6 +51,7 @@ import { Tools } from '@element-plus/icons-vue'
 import 'ol-plot/dist/ol-plot.css'
 import Plot from 'ol-plot'
 import { toRaw } from 'vue'
+import { fromLonLat, toLonLat } from 'ol/proj'
 
 export default {
   name: 'map-toolbox',
@@ -207,6 +208,16 @@ export default {
               src: new URL('@/assets/image/map/tool/side.png', import.meta.url).href,
               select: false
             },
+            {
+              name: '导出配置',
+              src: new URL('@/assets/image/map/tool/save.png', import.meta.url).href,
+              select: false
+            },
+            {
+              name: '导入配置',
+              src: new URL('@/assets/image/map/tool/save.png', import.meta.url).href,
+              select: false
+            },
             // {
             //   name: '框选',
             //   src: new URL('@/assets/image/map/tool/BoxSelection.png', import.meta.url).href,
@@ -282,17 +293,27 @@ export default {
             },
             {
               name: '直线箭头',
-              type: 'StraightArrow',
-              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
-            },
-            {
-              name: '双箭头',
-              type: 'DoubleArrow',
-              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
-            },
-            {
-              name: '粗单直箭头',
               type: 'AssaultDirection',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '细直箭头',
+              type: 'StraightArrow',
+              src: new URL('@/assets/image/map/tool/arrow.png', import.meta.url).href
+            },
+            {
+              name: '粗直箭头',
+              type: 'AssaultDirection',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '斜箭头',
+              type: 'FineArrow',
+              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+            },
+            {
+              name: '曲箭头',
+              type: 'SquadCombat',
               src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
             },
             {
@@ -303,12 +324,12 @@ export default {
             {
               name: '集结地',
               type: Plot.PlotTypes.GATHERING_PLACE,
-              src: new URL('@/assets/image/map/tool/zhixianjiantou.png', import.meta.url).href
+              src: new URL('@/assets/image/map/tool/excavation.png', import.meta.url).href
             },
             {
-              name: '直线箭头',
-              type: 'AssaultDirection',
-              src: this.getImage('')
+              name: '双箭头',
+              type: 'DoubleArrow',
+              src: new URL('@/assets/image/map/tool/shuangjiantou.png', import.meta.url).href
             },
           ]
         },
@@ -337,11 +358,6 @@ export default {
       // const data = new URL(path, import.meta.url).href;
       const data = new URL("/src/assets/image/map/tool/zhixianjiantou.png", import.meta.url).href;
       return data;
-    },
-    getImage2(name) {
-      const modules = import.meta.glob('./assets/image/map/tool/*.png')
-      const path = `./assets/image/map/tool/zhixianjiantou.png`;
-      return modules[path].default;
     },
     toggleBox() {
       this.mapToolBoxData.mapToolBoxIn = !this.mapToolBoxData.mapToolBoxIn
@@ -411,6 +427,12 @@ export default {
               this.mapToolBoxData.measureType = 'area'
               this.mapToolBoxData.measureDisable = false
             }
+            break
+          case '导出配置':
+            this.exportMapConfig()
+            break
+          case '导入配置':
+            this.importMapConfig()
             break
           case '框选':
             if (type.select) {
@@ -631,7 +653,7 @@ export default {
     // 初始化标绘工具
     initPlot(map) {
       this.plot = new Plot(map, {
-        zoomToExtent: true
+        zoomToExtent: false
       })
       this.plot.plotDraw.on('drawEnd', ({ feature }) => {
         // 开始编辑 
@@ -653,6 +675,64 @@ export default {
         const source = this.plot.plotDraw.drawLayer.getSource()
         source.removeFeature(feature)
       }
+    },
+    // 导出地图配置
+    exportMapConfig() {
+      const map = this.map
+      if (!map) return
+
+      // 地图视图配置
+      const viewConfig = {
+        center: toLonLat(map.getView().getCenter()),
+        zoom: map.getView().getZoom(),
+        rotation: map.getView().getRotation()
+      }
+
+      // 地图态势要素
+      const plotFeatures = this.plot.plotUtils.getFeatures()
+      console.log('viewConfig', viewConfig, plotFeatures);
+
+
+      const mapConfig = {
+        viewConfig,
+        plotFeatures
+      }
+      const fileName = '地图配置-' + new Date().getTime() + '.json'
+      Utils.download(JSON.stringify(mapConfig, null, 2), fileName, 'application/json')
+    },
+    // 导入地图配置
+    importMapConfig() {
+      // 从文件管理器中选择JSON文件导入
+      Utils.upload('.json', (e) => {
+        const file = e.target.files[0]
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            try {
+              const jsonData = JSON.parse(e.target.result); // 解析 JSON
+              console.log(jsonData); // 处理 JSON 数据
+              // 在这里可以执行其他配置读取操作
+              const { viewConfig, plotFeatures } = jsonData
+              const map = this.map
+              if (!map) return
+              if (plotFeatures) {
+                this.plot.plotUtils.addFeatures(plotFeatures)
+                const loadFeatures = this.plot.plotDraw?.drawLayer?.getSource().getFeatures()
+                loadFeatures.map(f => { f.set("type", "removable"); f.set("tool", "plot") })
+              }
+              if (viewConfig) {
+                viewConfig.center = fromLonLat(viewConfig.center)
+                map.getView().setRotation(viewConfig.rotation)
+                map.getView().setZoom(viewConfig.zoom)
+                map.getView().setCenter(viewConfig.center)
+              }
+            } catch (error) {
+              console.error("无效的 JSON 文件", error);
+            }
+          };
+          reader.readAsText(file); // 读取文件内容
+        }
+      })
     }
   }
 }
