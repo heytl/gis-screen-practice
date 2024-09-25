@@ -8,6 +8,7 @@
   import Draw, {createBox, createRegularPolygon} from 'ol/interaction/Draw'
   import {Point, Polygon} from "ol/geom";
   import {Circle, Fill, Icon, Stroke, Style, Text} from "ol/style";
+  import GeoJSON from 'ol/format/GeoJSON'
   import parseStyle from '@/components/CommonMap/MapDraw/style'
 
   // 默认图形样式
@@ -159,6 +160,7 @@
           })
 
           this.draw.on('drawend', (event) => {
+            const styleJSON = this.shape === 'Text' ? this.textEffect : this.graphEffect
             this.getStyle(event.feature) && event.feature.setStyle(this.getStyle(event.feature))
 
             this.$emit('drawend', event)
@@ -190,6 +192,16 @@
         this.source && this.source.clear()
       },
       /**
+       * 获取当前画布图层上的图形
+       * @method getFeatures
+       * @returns {Array}
+       */
+      getFeatures() {
+        if (!this.layer) return []
+        const source = this.layer.getSource()
+        return source.getFeatures()
+      },
+      /**
        * 删除指定图形
        * @method removeFeature
        * @param feature
@@ -207,6 +219,22 @@
         const features = [].concat(feature)
         const source = this.layer.getSource()
         source.addFeatures(features)
+      },
+      /**
+       * 图层上全部图形转换成JSON描述
+       * @returns {string}
+       */
+      toJSON() {
+        const features = this.getFeatures()
+        return new GeoJSON().writeFeatures(features)
+      },
+      /**
+       * 根据GeoJSON在图层上创建 feature
+       * @param {object} json
+       */
+      fromJSON(json) {
+        const features = new GeoJSON().readFeatures(json)
+        this.addFeature(features)
       },
       /**
        * 撤回上一次点

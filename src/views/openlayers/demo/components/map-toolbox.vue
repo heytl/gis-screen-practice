@@ -22,6 +22,37 @@
     <transition name="fade">
       <div class="tool_open_box" v-show="mapToolBoxData.mapToolBoxIn">
         <el-collapse v-model="activeNames" class="my-el-collapse">
+          <el-collapse-item title="画笔" name="画笔">
+            <div class="brush-setting">
+              <div class="items wrap">
+                <div class="item">
+                  <span class="label">填充色</span>
+                  <el-color-picker v-model="brushOptions.fillColor" size="small" class="content" show-alpha />
+                </div>
+                <div class="item">
+                  <span class="label">边框色</span>
+                  <el-color-picker v-model="brushOptions.strokeColor" size="small" show-alpha />
+                </div>
+                <div class="item">
+                  <span class="label">文本色</span>
+                  <el-color-picker v-model="brushOptions.textColor" size="small" show-alpha />
+                </div>
+              </div>
+              <div class="items">
+                <div class="item">
+                  <span class="label">边框宽度</span>
+                  <el-input-number v-model="brushOptions.strokeWidth" size="small" :min="0" :max="20" />
+                </div>
+              </div>
+              <div class="items">
+                <div class="item">
+                  <span class="label">字体大小</span>
+                  <el-input-number v-model="brushOptions.textSize" size="small" :min="8" :max="50" />
+                </div>
+              </div>
+            </div>
+
+          </el-collapse-item>
           <div v-for="(item, index) in toolData" :key="item.name">
             <el-collapse-item :title="item.name" :name="item.name">
               <!-- <p>{{ item.name }}</p> -->
@@ -46,6 +77,7 @@ import MapHtml from '@/components/CommonMap/MapHtml/map-html.vue'
 import MapMeasure from '@/components/CommonMap/MapMeasure/map-measure.vue'
 import MapDrawGraph from '@/components/CommonMap/MapDrawGraph/map-draw-graph.vue'
 import parseStyle from '@/components/CommonMap/MapDraw/style'
+import GeoJSON from 'ol/format/GeoJSON'
 import Utils from '@/utils'
 import { Tools } from '@element-plus/icons-vue'
 import 'ol-plot/dist/ol-plot.css'
@@ -64,43 +96,16 @@ export default {
     MapMeasure,
     MapDrawGraph
   },
-  props: {
-    // 填充颜色
-    fillColor: {
-      type: String,
-      default: 'rgba(255,255,255,0.5)'
-    },
-    // 边框颜色
-    strokeColor: {
-      type: String,
-      default: '#409eff'
-    },
-    // 边框宽度
-    strokeWidth: {
-      type: Number,
-      default: 3
-    },
-    // 文本颜色
-    textColor: {
-      type: String,
-      default: '#409eff'
-    },
-    // 文本字体大小
-    textSize: {
-      type: Number,
-      default: 14
-    }
-  },
   computed: {
     // 计算图形样式配置
     getGraphEffect() {
       return {
         // 填充
-        fill: this.fillColor,
+        fill: this.brushOptions.fillColor,
         // 边界
         stroke: {
-          color: this.strokeColor,
-          width: this.strokeWidth
+          color: this.brushOptions.strokeColor,
+          width: this.brushOptions.strokeWidth
         }
       }
     },
@@ -110,18 +115,18 @@ export default {
         // 文本
         text: {
           text: '文本内容', // 文本标注内容
-          font: this.textSize + 'px', // 字体大小
-          fill: this.textColor, // 字体颜色
+          font: this.brushOptions.textSize + 'px', // 字体大小
+          fill: this.brushOptions.textColor, // 字体颜色
           stroke: {
             width: 2, // 字体掩膜宽度
             color: '#fff' // 字体掩膜颜色
           },
           rotation: 0, // 旋转角度
-          backgroundFill: this.fillColor, // 背景颜色
-          padding: [0.3 * this.textSize, 0.3 * this.textSize, 0.15 * this.textSize, 0.3 * this.textSize], // 背景的padding
+          backgroundFill: this.brushOptions.fillColor, // 背景颜色
+          padding: [0.3 * this.brushOptions.textSize, 0.3 * this.brushOptions.textSize, 0.15 * this.brushOptions.textSize, 0.3 * this.brushOptions.textSize], // 背景的padding
           backgroundStroke: {
-            width: this.strokeWidth, // 背景边框宽度
-            color: this.strokeColor // 背景边框颜色
+            width: this.brushOptions.strokeWidth, // 背景边框宽度
+            color: this.brushOptions.strokeColor // 背景边框颜色
           }
         }
       }
@@ -147,6 +152,14 @@ export default {
       // 图形参数
       graph: {
         type: 'None'
+      },
+      // 画笔参数
+      brushOptions: {
+        strokeColor: '#409eff',
+        fillColor: 'rgba(255,255,255,0.5)',
+        strokeWidth: 3,
+        textColor: '#409eff',
+        textSize: 14
       },
       mapToolBoxData: {
         mapToolBoxIn: false,
@@ -614,6 +627,7 @@ export default {
       e.feature.setStyle(parseStyle(this.mapToolBoxData.iconBrush))
       e.feature.set("type", "removable")
       e.feature.set("tool", "iconDraw")
+      e.feature.set("style", JSON.parse(JSON.stringify(this.mapToolBoxData.iconBrush)))
     },
     // 图形绘制结束
     graphDrawEnd(e) {
@@ -692,10 +706,19 @@ export default {
       const plotFeatures = this.plot.plotUtils.getFeatures()
       console.log('viewConfig', viewConfig, plotFeatures);
 
+      // map-draw
+      const iconFeatures = this.$refs.iconDraw.toJSON()
+      console.log('iconFeatures', iconFeatures);
+
+      // map-draw-graph
+      const graphFeatures = this.$refs.graph.toJSON()
+      console.log('graphFeatures', graphFeatures);
 
       const mapConfig = {
         viewConfig,
-        plotFeatures
+        plotFeatures,
+        iconFeatures,
+        graphFeatures
       }
       const fileName = '地图配置-' + new Date().getTime() + '.json'
       Utils.download(JSON.stringify(mapConfig, null, 2), fileName, 'application/json')
@@ -712,7 +735,7 @@ export default {
               const jsonData = JSON.parse(e.target.result); // 解析 JSON
               console.log(jsonData); // 处理 JSON 数据
               // 在这里可以执行其他配置读取操作
-              const { viewConfig, plotFeatures } = jsonData
+              const { viewConfig, plotFeatures, iconFeatures, graphFeatures } = jsonData
               const map = this.map
               if (!map) return
               if (plotFeatures) {
@@ -726,6 +749,19 @@ export default {
                 map.getView().setZoom(viewConfig.zoom)
                 map.getView().setCenter(viewConfig.center)
               }
+              if (iconFeatures) {
+                new GeoJSON().readFeatures(iconFeatures).forEach(f => {
+                  f.setStyle(parseStyle(f.get('style')))
+                  this.$refs.iconDraw.addFeature(f)
+                })
+              }
+              if (graphFeatures) {
+                new GeoJSON().readFeatures(graphFeatures).forEach(f => {
+                  const style = f.get('style')
+                  style && f.setStyle(parseStyle(style))
+                  this.$refs.graph.addFeature(f)
+                })
+              }
             } catch (error) {
               console.error("无效的 JSON 文件", error);
             }
@@ -737,13 +773,6 @@ export default {
   }
 }
 </script>
-
-<style>
-.el-input--small .el-input__inner {
-  padding-left: 39px;
-  padding-right: 39px;
-}
-</style>
 
 <style lang="scss" scoped>
 .my-el-collapse {
@@ -942,24 +971,54 @@ export default {
     }
   }
 
-  .poi-list {
-    width: 100%;
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .brush-setting {
+    color: #fff;
 
-    li {
-      padding-left: 8px;
-      margin: 10px 0;
-      cursor: pointer;
-      // background-color: "rgba(89, 180, 185, 1)";
+    .items {
+      &.wrap {
+        display: flex;
+        flex-wrap: wrap;
 
-      &:hover {
-        color: #00ddaa;
+        .item {
+          flex: 0 0 50%;
+        }
       }
 
-      &.highlight {
-        color: #00ddaa;
+      .item {
+        display: flex;
+        align-items: center;
+        margin: 0 0 5px 0;
+
+        .label {
+          margin: 0 10px;
+        }
+
+        .content {
+          margin: 8px;
+        }
+
+        &.side {
+          .el-input-number {
+            width: 60px;
+
+            :deep(.el-input__inner) {
+              padding-left: 5px;
+              padding-right: 5px;
+            }
+          }
+
+          justify-content: space-between;
+
+          :deep(.el-checkbox__label) {
+            color: #aaa;
+          }
+
+          .is-checked {
+            :deep(.el-checkbox__label) {
+              color: #fff;
+            }
+          }
+        }
       }
     }
   }

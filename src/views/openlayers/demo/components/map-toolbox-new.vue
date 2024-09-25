@@ -602,13 +602,6 @@ export default {
 }
 </script>
 
-<style>
-.el-input--small .el-input__inner {
-  padding-left: 39px;
-  padding-right: 39px;
-}
-</style>
-
 <style lang="scss" scoped>
 .my-el-collapse {
   --el-collapse-border-color: transparent;
