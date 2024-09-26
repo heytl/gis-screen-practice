@@ -27,15 +27,18 @@
               <div class="items wrap">
                 <div class="item">
                   <span class="label">填充色</span>
-                  <el-color-picker v-model="brushOptions.fillColor" size="small" class="content" show-alpha />
+                  <el-color-picker v-model="brushOptions.fillColor" :predefine="predefinecolors" size="small"
+                    class="content" show-alpha />
                 </div>
                 <div class="item">
                   <span class="label">边框色</span>
-                  <el-color-picker v-model="brushOptions.strokeColor" size="small" show-alpha />
+                  <el-color-picker v-model="brushOptions.strokeColor" :predefine="predefinecolors" size="small"
+                    show-alpha />
                 </div>
                 <div class="item">
                   <span class="label">文本色</span>
-                  <el-color-picker v-model="brushOptions.textColor" size="small" show-alpha />
+                  <el-color-picker v-model="brushOptions.textColor" :predefine="predefinecolors" size="small"
+                    show-alpha />
                 </div>
               </div>
               <div class="items">
@@ -51,7 +54,6 @@
                 </div>
               </div>
             </div>
-
           </el-collapse-item>
           <div v-for="(item, index) in toolData" :key="item.name">
             <el-collapse-item :title="item.name" :name="item.name">
@@ -84,6 +86,7 @@ import 'ol-plot/dist/ol-plot.css'
 import Plot from 'ol-plot'
 import { toRaw } from 'vue'
 import { fromLonLat, toLonLat } from 'ol/proj'
+import { asArray } from 'ol/color'
 
 export default {
   name: 'map-toolbox',
@@ -136,6 +139,14 @@ export default {
     this.map = this.mapVm
     this.initPlot(toRaw(this.map))
   },
+  watch: {
+    brushOptions: {
+      handler() {
+        console.log('brushOptions', this.brushOptions)
+      },
+      deep: true,
+    },
+  },
   data() {
     return {
       map: null,
@@ -149,6 +160,15 @@ export default {
       searchPoiCenter: null,
       searchPoiRadius: 5000,
       activeNames: ['工具'],
+      predefinecolors: [
+        '#ff0000',
+        '#fbb034',
+        '#ffdd00',
+        '#c1d82f',
+        '#00a4e4',
+        '#8a7967',
+        '#6a737b',
+      ],
       // 图形参数
       graph: {
         type: 'None'
@@ -367,6 +387,9 @@ export default {
     }
   },
   methods: {
+    getPredefineColors() {
+      return this.predefinecolors
+    },
     getImage(path) {
       // const data = new URL(path, import.meta.url).href;
       const data = new URL("/src/assets/image/map/tool/zhixianjiantou.png", import.meta.url).href;
@@ -673,8 +696,19 @@ export default {
         // 开始编辑 
         if (feature) {
           this.plot.plotEdit.activate(feature);
+          // 设置一些属性
           feature.set("type", "removable")
           feature.set("tool", "plot")
+          // 根据画笔参数设置样式
+          try {
+            this.plot.plotUtils.setBorderWidth(feature, this.brushOptions.strokeWidth);
+            this.plot.plotUtils.setBackgroundColor(feature, this.brushOptions.fillColor);
+            this.plot.plotUtils.setBorderColor(feature, this.brushOptions.strokeColor);
+            const colorArray = asArray(this.brushOptions.fillColor)
+            this.plot.plotUtils.setOpacity(feature, colorArray[3]);
+          } catch (error) {
+            console.warn(error);
+          }
         }
       });
     },
