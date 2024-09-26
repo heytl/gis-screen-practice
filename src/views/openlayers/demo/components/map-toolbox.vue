@@ -756,11 +756,7 @@ export default {
                 })
               }
               if (graphFeatures) {
-                new GeoJSON().readFeatures(graphFeatures).forEach(f => {
-                  const style = f.get('style')
-                  style && f.setStyle(parseStyle(style))
-                  this.$refs.graph.addFeature(f)
-                })
+                this.$refs.graph.fromJSON(graphFeatures)
               }
             } catch (error) {
               console.error("无效的 JSON 文件", error);
