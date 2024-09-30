@@ -160,15 +160,7 @@ export default {
       searchPoiCenter: null,
       searchPoiRadius: 5000,
       activeNames: ['工具'],
-      predefinecolors: [
-        '#ff0000',
-        '#fbb034',
-        '#ffdd00',
-        '#c1d82f',
-        '#00a4e4',
-        '#8a7967',
-        '#6a737b',
-      ],
+      predefinecolors: ['#ff0000', '#fbb034', '#ffdd00', '#c1d82f', '#c71585', '#00a4e4', '#8a7967', '#6a737b', '#ff000077', '#00a4e477'],
       // 图形参数
       graph: {
         type: 'None'
