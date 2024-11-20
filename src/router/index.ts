@@ -19,6 +19,11 @@ const routes: RouteRecordRaw[] = [
     path: '/demo',
     component: () => import('@/views/openlayers/demo/DevMap.vue'),
     meta: {}
+  },
+  {
+    path: '/ol-cesium',
+    component: () => import('@/views/openlayers/ol-cesium/index.vue'),
+    meta: {}
   }
 ]
 

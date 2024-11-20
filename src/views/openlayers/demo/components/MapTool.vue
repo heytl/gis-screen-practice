@@ -23,7 +23,7 @@ import MapMeasure from '@/components/CommonMap/MapMeasure/map-measure.vue'
 
 type toolType = { id: string; label: string; active: boolean }
 const activeTool = ref<toolType>()
-
+const emits =  defineEmits(['changeTool'])
 const mapTools = ref([
   {
     id: 'ranging',
@@ -75,7 +75,7 @@ function changeTool(tool) {
     activeTool.value = tool
     updateTool(activeTool.value)
   }
-  // emits('changeTool', tool)
+  emits('changeTool', tool)
 }
 
 function updateTool(tool) {

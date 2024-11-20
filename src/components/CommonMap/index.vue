@@ -36,16 +36,18 @@ emits('mapDefined', map)
 map.on('click', (event) => emits('click', event))
 map.on('singleclick', (event) => emits('singleclick', event))
 map.on('pointermove', (event) => emits('pointermove', event))
-
 // 添加天地图作为底图
 function addTDTLayer(map) {
-  const tdt_vec_c = createTDTLayerWMTS('img_w')
+  const tdt_vec_c = createTDTLayerWMTS('vec_w')
   const tdt_cva_c = createTDTLayerWMTS('cva_w')
   const tdtVectorGroup = new LayerGroup({
     visible: true,
     layers: [tdt_vec_c, tdt_cva_c]
   })
   map?.addLayer(tdtVectorGroup)
+  tdt_cva_c.on('postrender', (event) => {
+    filterCanvas(event.context)
+  })
 }
 
 function initMap() {
@@ -94,6 +96,16 @@ function animateView(options: object = {}) {
     duration: 1500,
     ...options
   })
+}
+
+/**
+ * 过滤 Canvas 实现地图效果
+ */
+function filterCanvas(context) { //设置地图样式
+  context.save()
+  context.filter = 'brightness(0.65) hue-rotate(20deg) contrast(2.1) grayscale(1.5) saturate(0) sepia(0.8) invert(0.9) '
+  context.drawImage(context.canvas, 0, 0)
+  context.restore()
 }
 
 onMounted(() => {

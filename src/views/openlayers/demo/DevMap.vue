@@ -22,7 +22,7 @@ function mapDefined(map) {
   mapInstance.value = map
   mapInited.value = true
   console.log('map', mapInstance.value);
-  const { addGraticule } = useMapSetting(map)
+  // const { addGraticule } = useMapSetting(map)
 }
 
 function addCustomInteraction() {
@@ -33,11 +33,21 @@ function addCustomInteraction() {
 function deleteFeature(feature) {
   feature && toolBoxRef.value.deleteFeature(feature)
 }
+
+function changeTool(tool) {
+  switch (tool.id) {
+    case 'switchMap':
+      mapRef.value.toggleMap()
+      break
+    default:
+      break;
+  }
+}
 </script>
 
 <template>
   <CommonMap ref="mapRef" @pointermove="mapPointerMove" @singleclick="mapClick" @mapDefined="mapDefined">
-    <MapTool />
+    <MapTool @changeTool="changeTool" />
     <MapToolBox ref="toolBoxRef" />
     <!-- <MapToolBoxNew /> -->
     <MapContextMenu @removeFeature="deleteFeature" />

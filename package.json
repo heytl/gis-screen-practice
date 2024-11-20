@@ -12,10 +12,12 @@
     "@amap/amap-jsapi-loader": "^1.0.1",
     "@element-plus/icons-vue": "^2.3.1",
     "@turf/turf": "^7.1.0",
+    "cesium": "^1.113",
     "echarts": "^5.4.2",
     "element-plus": "^2.8.3",
     "ol": "^7.x",
     "ol-plot": "^4.1.10",
+    "ol-cesium": "2.14.0",
     "sass": "^1.62.1",
     "vue": "^3.2.47",
     "vue-router": "4"
