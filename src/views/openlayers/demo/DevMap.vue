@@ -9,6 +9,7 @@ import { onMounted, reactive, ref, shallowRef } from 'vue'
 import { useHandleMap } from './hooks/useHandleMapHooks'
 import { useMapSetting } from './hooks/useMapSettingHooks'
 import MiddleClickDragRotate from '@/plugins/ol-mapkit/MiddleClickDragRotate.js'
+import MapCurveLine from './components/MapCurveLine.vue'
 const mapRef = shallowRef(null)
 const toolBoxRef = ref(null)
 const { mapPointerMove, mapClick } = useHandleMap()
@@ -52,6 +53,7 @@ function changeTool(tool) {
     <!-- <MapToolBoxNew /> -->
     <MapContextMenu @removeFeature="deleteFeature" />
     <MapPlot v-if="mapInited" :map="mapInstance" />
+    <MapCurveLine />
   </CommonMap>
 </template>
 
