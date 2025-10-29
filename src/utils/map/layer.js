@@ -1,5 +1,5 @@
 import { getTopLeft, getWidth } from 'ol/extent.js'
-import TileLayer from 'ol/layer/Tile.js'
+import { Group as LayerGroup, Tile as TileLayer } from 'ol/layer'
 import { get as getProjection } from 'ol/proj.js'
 import WMTS from 'ol/source/WMTS.js'
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
@@ -106,4 +106,76 @@ export function createBingLayer() {
       imagerySet: 'Aerial'
     })
   })
+}
+
+
+/***
+ * 高德矢量地图
+ * @returns {*|TileLayer<XYZ>}
+ */
+export function createGaodeVecLayer() {
+  return new TileLayer({
+    source: new XYZ({
+      crossOrigin: '', // 跨域操作
+      url: 'https://webst0{1-4}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}',
+    }),
+  })
+}
+
+/**
+ * 创建高德地图图层
+ * @param {string} layerType - 地图类型，可选值: 'normal' (矢量), 'satellite' (卫星), 'satellite_road' (卫星带路网)
+ * @returns {TileLayer} - OpenLayers 地图图层对象
+ */
+export function createGaodeLayer(layerType) {
+  let url
+
+  switch (layerType) {
+    case 'normal': // 矢量地图
+      url =
+        'https://webrd0{1-4}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}'
+      break
+    case 'satellite': // 卫星图
+      url =
+        'https://webst0{1-4}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}'
+      break
+    case 'satellite_road': // 卫星图带路网
+      // 卫星图和路网是两个独立的图层，需要叠加
+      // 这里返回一个图层组，包含两个子图层
+      const satelliteLayer = new TileLayer({
+        source: new XYZ({
+          url: 'https://webst0{1-4}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+          crossOrigin: 'anonymous',
+          maxZoom: 18,
+        }),
+      })
+
+      const roadLayer = new TileLayer({
+        source: new XYZ({
+          // ltype=2 纯路网，ltype=7 带注记的路网，不带ltype默认详细注记路网
+          url: 'https://webst0{1-4}.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scale=1&style=8',
+          crossOrigin: 'anonymous',
+          maxZoom: 18,
+        }),
+      })
+
+      // 创建一个图层组，并把两个图层放进去
+      return new LayerGroup({
+        layers: [satelliteLayer, roadLayer],
+      })
+
+    default:
+      console.error('不支持的高德地图类型：' + layerType)
+      return null
+  }
+
+  // 如果是单个图层，则统一返回
+  if (url) {
+    return new TileLayer({
+      source: new XYZ({
+        url: url,
+        crossOrigin: 'anonymous', // 解决跨域问题
+      }),
+    })
+  }
 }
